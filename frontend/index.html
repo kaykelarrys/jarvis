@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S — Assistente de IA Pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-bg"></div>
+
+<!-- TELA DE ACESSO -->
+<div id="authScreen">
+  <div class="auth-logo-wrap">
+    <div class="auth-logo">J.A.R.V.I.S</div>
+    <div class="auth-tagline">ASSISTENTE DE INTELIGÊNCIA ARTIFICIAL PESSOAL</div>
+  </div>
+
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login" onclick="switchTab('login')">ENTRAR</button>
+      <button class="auth-tab" data-tab="register" onclick="switchTab('register')">CADASTRAR</button>
+      <button class="auth-tab" data-tab="unlock" onclick="switchTab('unlock')">DESBLOQUEAR</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <div class="field"><label>E-MAIL</label><input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email"></div>
+      <div class="field"><label>PALAVRA-CHAVE</label><input type="password" id="loginPass" placeholder="sua palavra-chave" autocomplete="current-password"></div>
+      <label class="remember-row">
+        <input type="checkbox" id="rememberMe">
+        <span>Lembrar de mim por 30 dias</span>
+      </label>
+      <button class="btn-primary" onclick="doLogin()">ACESSAR SISTEMA</button>
+      <div class="auth-notice">Esqueceu? Clique em <strong style="color:var(--cyan);cursor:pointer" onclick="switchTab('unlock')">DESBLOQUEAR</strong></div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="registerForm" style="display:none">
+      <div class="field"><label>NOME COMPLETO</label><input type="text" id="regName" placeholder="seu nome completo"></div>
+      <div class="field"><label>E-MAIL</label><input type="email" id="regEmail" placeholder="seu@email.com"></div>
+      <div class="field"><label>PALAVRA-CHAVE (mínimo 4 caracteres)</label><input type="password" id="regPass" placeholder="crie sua palavra-chave secreta"></div>
+      <div class="field"><label>PERGUNTA DE SEGURANÇA</label>
+        <select id="regQuestion">
+          <option value="pet">Qual o nome do seu primeiro animal de estimação?</option>
+          <option value="city">Em qual cidade você nasceu?</option>
+          <option value="school">Qual o nome da sua primeira escola?</option>
+          <option value="friend">Qual o nome do seu melhor amigo de infância?</option>
+        </select>
+      </div>
+      <div class="field"><label>RESPOSTA SECRETA</label><input type="text" id="regAnswer" placeholder="sua resposta (guarde em local seguro)"></div>
+      <button class="btn-primary" onclick="doRegister()">CRIAR MINHA CONTA GRÁTIS</button>
+      <div class="auth-notice">⚠ Use um e-mail que somente você tem acesso.<br>5 dias de teste gratuito — sem necessidade de cartão.</div>
+    </div>
+
+    <!-- DESBLOQUEAR -->
+    <div id="unlockForm" style="display:none">
+      <div id="unlockOptions">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:14px;text-align:center;letter-spacing:1px">COMO DESEJA RECUPERAR O ACESSO?</div>
+        <button class="unlock-option-btn unlock-opt-email" onclick="showUnlockMethod('email')">📧 &nbsp; RECEBER CÓDIGO NO E-MAIL</button>
+        <button class="unlock-option-btn unlock-opt-secret" onclick="showUnlockMethod('secret')">🔑 &nbsp; USAR RESPOSTA SECRETA</button>
+      </div>
+      <div id="unlockEmail" style="display:none">
+        <div id="unlockEmailStep1">
+          <div class="field"><label>E-MAIL CADASTRADO</label><input type="email" id="unlockEmailInput" placeholder="seu@email.com"></div>
+          <button class="btn-primary" onclick="sendUnlockCode()">ENVIAR CÓDIGO DE DESBLOQUEIO</button>
+          <span class="back-link" onclick="resetUnlock()">← Voltar às opções</span>
+        </div>
+        <div id="unlockEmailStep2" style="display:none">
+          <div style="font-size:10px;color:var(--cyan);font-family:'Share Tech Mono',monospace;margin-bottom:16px;line-height:1.8;padding:12px;border:1px solid rgba(0,212,255,0.2);border-radius:8px">✓ Código enviado! Verifique sua caixa de entrada e a pasta de spam.</div>
+          <div class="field"><label>CÓDIGO DE 6 DÍGITOS</label><input type="text" class="code-input" id="unlockCodeInput" placeholder="000000" maxlength="6"></div>
+          <div class="field"><label>NOVA PALAVRA-CHAVE</label><input type="password" id="unlockNewPass" placeholder="sua nova palavra-chave"></div>
+          <button class="btn-primary" onclick="doUnlockWithCode()">DESBLOQUEAR CONTA</button>
+          <span class="back-link" onclick="document.getElementById('unlockEmailStep1').style.display='block';document.getElementById('unlockEmailStep2').style.display='none'">← Reenviar código</span>
+        </div>
+      </div>
+      <div id="unlockSecret" style="display:none">
+        <div class="field"><label>E-MAIL CADASTRADO</label><input type="email" id="unlockSecretEmail" placeholder="seu@email.com"></div>
+        <div class="field"><label>RESPOSTA SECRETA</label><input type="text" id="unlockSecretAnswer" placeholder="sua resposta de segurança"></div>
+        <div class="field"><label>NOVA PALAVRA-CHAVE</label><input type="password" id="unlockSecretNewPass" placeholder="sua nova palavra-chave"></div>
+        <button class="btn-primary" onclick="doUnlockWithSecret()">DESBLOQUEAR CONTA</button>
+        <span class="back-link" onclick="resetUnlock()">← Voltar às opções</span>
+      </div>
+    </div>
+
+    <div class="auth-err" id="authErr"></div>
+  </div>
+</div>
+
+<!-- TELA PRINCIPAL -->
+<div id="appScreen">
+  <div class="app">
+    <div class="topbar">
+      <div class="logo">J.A.R.V.I.S<span>ASSISTENTE DE INTELIGÊNCIA ARTIFICIAL PESSOAL</span></div>
+      <div class="topbar-right">
+        <div class="status-bar">
+          <div class="status-dot online" id="mainDot"></div>
+          <span id="mainStatus">ONLINE</span>
+        </div>
+        <div class="user-info">
+          <span class="user-name" id="userName"></span>
+          <span class="plan-badge-top plan-trial" id="planBadge">TRIAL</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">SAIR</button>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="center-col">
+
+        <!-- VOZ -->
+        <div class="voice-panel">
+          <div class="orb-container" id="orbContainer">
+            <div class="orb-ring"></div><div class="orb-ring"></div><div class="orb-ring"></div>
+            <div class="orb-btn" id="orbBtn" onclick="toggleListen()">🎙</div>
+          </div>
+          <div class="voice-wave" id="voiceWave">
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+          <div class="voice-status" id="voiceStatusTxt">CLIQUE PARA ATIVAR O MICROFONE</div>
+
+          <div class="ai-chat" id="aiChat">
+            <div class="ai-empty">Diga algo ou clique em um comando abaixo...</div>
+          </div>
+
+          <div class="cmd-chips">
+            <div class="chip" onclick="simulateCmd('Olá Jarvis, como você está?')">👋 Olá Jarvis</div>
+            <div class="chip" onclick="simulateCmd('Jarvis, cheguei em casa')">🏠 Cheguei em casa</div>
+            <div class="chip" onclick="simulateCmd('Jarvis, cheguei no trabalho')">💼 Trabalho</div>
+            <div class="chip" onclick="simulateCmd('Jarvis, o que você pode fazer?')">💡 O que você faz?</div>
+            <div class="chip" onclick="simulateCmd('Jarvis, criar novo plano')">➕ Novo plano</div>
+            <div class="chip" onclick="simulateCmd('Jarvis, boa noite')">🌙 Boa noite</div>
+          </div>
+
+          <div class="trust-bar" id="trustBar" onclick="toggleTrust()">
+            <div>
+              <div class="trust-label">◈ MODO CONFIANÇA</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:'Share Tech Mono',monospace">Executa sem pedir senha — plano Plus ou superior</div>
+            </div>
+            <div class="toggle" id="trustToggle"></div>
+          </div>
+        </div>
+
+        <!-- PLANOS DE ROTINA -->
+        <div class="panel">
+          <div class="section-title">PLANOS DE ROTINA</div>
+          <div id="plansList"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:20px">Carregando planos...</div></div>
+          <button class="add-btn" onclick="openAddPlan()">+ ADICIONAR NOVO PLANO</button>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DIREITA -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- HISTÓRICO -->
+        <div class="panel history-panel">
+          <div class="section-title">HISTÓRICO</div>
+          <div id="historyList"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:20px">Carregando...</div></div>
+        </div>
+
+        <!-- SEGURANÇA -->
+        <div class="panel">
+          <div class="section-title">CONTA</div>
+          <div class="sec-row"><span class="sec-label">PLANO</span><span class="sec-val info" id="planName">TRIAL</span></div>
+          <div class="sec-row"><span class="sec-label">DIAS RESTANTES</span><span class="sec-val warn" id="trialDays">5 DIAS</span></div>
+          <div class="sec-row"><span class="sec-label">STATUS</span><span class="sec-val ok" id="lockStatus">DESBLOQUEADA</span></div>
+          <div class="sec-row"><span class="sec-label">IA</span><span class="sec-val ok">ATIVA</span></div>
+          <button class="add-btn" onclick="openPricing()" style="margin-top:10px;border-style:solid;border-color:rgba(0,212,255,0.3);color:var(--cyan)">⬆ FAZER UPGRADE DO PLANO</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AUTENTICAÇÃO -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    <div class="modal-title" id="authModalTitle">AUTENTICAÇÃO</div>
+    <div class="modal-desc" id="authModalDesc">Digite sua palavra-chave para continuar</div>
+    <input type="password" class="modal-input" id="authInput" placeholder="sua palavra-chave...">
+    <div class="modal-err" id="authModalErr"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="confirmAuth()">CONFIRMAR</button>
+      <button class="modal-btn cancel" onclick="closeModal('authModal')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOVO PLANO -->
+<div class="modal-overlay" id="addPlanModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addPlanModal')">✕</button>
+    <div class="modal-title">CRIAR NOVO PLANO</div>
+    <div class="modal-desc">Defina a frase de ativação e as ações do plano</div>
+    <input type="text" class="modal-input" id="planPhrase" placeholder='frase de ativação: "Jarvis, cheguei em casa"'>
+    <input type="text" class="modal-input" id="planName2" placeholder="nome do plano (ex: Rotina de chegada)">
+    <input type="text" class="modal-input" id="planActions" placeholder="ações separadas por vírgula: Spotify, Chrome, Gmail">
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="savePlan()">SALVAR PLANO</button>
+      <button class="modal-btn cancel" onclick="closeModal('addPlanModal')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: UPGRADE / PLANOS -->
+<div class="modal-overlay" id="pricingModal">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeModal('pricingModal')">✕</button>
+    <div class="modal-title">ESCOLHA SEU PLANO</div>
+    <div class="modal-desc">Faça upgrade para desbloquear mais recursos do Jarvis</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">BÁSICO</div>
+        <div class="price-amount">R$ 29,90</div>
+        <div class="price-period">/mês</div>
+        <div class="price-feature">3 planos de rotina</div>
+        <div class="price-feature">30 mensagens de IA/dia</div>
+        <div class="price-feature">Histórico completo</div>
+        <div class="price-feature">Suporte por e-mail</div>
+        <button class="price-btn" onclick="selectPlan('basic')">ASSINAR BÁSICO</button>
+      </div>
+      <div class="price-card highlight">
+        <div class="price-badge" style="background:rgba(0,212,255,0.15);border:1px solid rgba(0,212,255,0.4);color:var(--cyan)">MAIS POPULAR</div>
+        <div class="price-name">PLUS</div>
+        <div class="price-amount">R$ 34,90</div>
+        <div class="price-period">/mês</div>
+        <div class="price-feature">10 planos de rotina</div>
+        <div class="price-feature">100 mensagens de IA/dia</div>
+        <div class="price-feature">Modo confiança ativo</div>
+        <div class="price-feature">Histórico completo</div>
+        <div class="price-feature">Suporte prioritário</div>
+        <button class="price-btn" onclick="selectPlan('plus')">ASSINAR PLUS</button>
+      </div>
+      <div class="price-card">
+        <div class="price-badge" style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);color:#a855f7">COMPLETO</div>
+        <div class="price-name" style="color:#a855f7">PREMIUM</div>
+        <div class="price-amount">R$ 39,90</div>
+        <div class="price-period">/mês</div>
+        <div class="price-feature">Planos ilimitados</div>
+        <div class="price-feature">IA completamente livre</div>
+        <div class="price-feature">Modo confiança ativo</div>
+        <div class="price-feature">Todas as integrações</div>
+        <div class="price-feature">Suporte VIP 24 horas</div>
+        <button class="price-btn" style="border-color:rgba(168,85,247,0.3);color:#a855f7;background:rgba(168,85,247,0.08)" onclick="selectPlan('premium')">ASSINAR PREMIUM</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3)">Cancele a qualquer momento • Sem cobrança no período de teste</div>
+  </div>
+</div>
+
+<div class="hotkey-hint">MICROFONE: <span>Ctrl+Espaço</span></div>
+<script src="js/app.js"></script>
+</body>
+</html>
