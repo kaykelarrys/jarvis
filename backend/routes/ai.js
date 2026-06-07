@@ -7,8 +7,8 @@ const PLAN_AI_LIMITS = { trial: 10, basic: 30, plus: 100, premium: -1, vip: -1 }
 router.post('/chat', auth, async (req, res) => {
   try {
     const { message, history = [] } = req.body;
-    const user = db.prepare('SELECT name, plan, is_vip, personality FROM users WHERE id = ?').get(req.user.id);
-    const firstName = user?.name?.split(' ')[0] || 'você';
+    const userRaw = db.prepare('SELECT name, plan, is_vip, personality FROM users WHERE id = ?').get(req.user.id);
+    const user = userRaw ? userRaw : {name:"Usuário",plan:"trial",is_vip:0,personality:"amigavel"};const firstName = user?.name?.split(' ')[0] || 'você';
 
     // Verificar limite de mensagens
     const limit = PLAN_AI_LIMITS[user.plan] || 10;
